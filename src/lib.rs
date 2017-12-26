@@ -32,11 +32,18 @@ impl<T> LinearVectorInterpolator<T>
 where
     T: Float,
 {
-    pub fn new(points: Vec<TimedPoint<T, Vec<T>>>) -> Self {
-        Self {
+    pub fn new(times: Vec<T>, points: Vec<Vec<T>>) -> Option<Self> {
+        let timed_points = from_times_and_points(times, points)?;
+        Self::from_points(timed_points)
+    }
+    pub fn from_points(points: Vec<TimedPoint<T, Vec<T>>>) -> Option<Self> {
+        if !is_points_valid(&points) {
+            return None;
+        }
+        Some(Self {
             dim: points[0].point.len(),
             points,
-        }
+        })
     }
 }
 
@@ -109,12 +116,54 @@ where
     T::from(val).unwrap()
 }
 
+fn is_points_valid<T>(points: &Vec<TimedPoint<T, Vec<T>>>) -> bool {
+    if points.is_empty() {
+        return false;
+    }
+    if points[0].point.is_empty() {
+        return false;
+    }
+    let dim = points[0].point.len();
+    for p in points {
+        if p.point.len() != dim {
+            return false;
+        }
+    }
+    true
+}
+
+fn from_times_and_points<T>(
+    times: Vec<T>,
+    points: Vec<Vec<T>>,
+) -> Option<Vec<TimedPoint<T, Vec<T>>>>
+where
+    T: Float,
+{
+    if times.len() != points.len() {
+        return None;
+    }
+    let mut timed_points: Vec<TimedPoint<T, Vec<T>>> = Vec::new();
+    for (i, point) in points.into_iter().enumerate() {
+        timed_points.push(TimedPoint::new(times[i], point));
+    }
+    Some(timed_points)
+}
+
 // from https://en.wikipedia.org/wiki/Spline_(mathematics)
 impl<T> CSplineVectorInterpolator<T>
 where
     T: Float,
 {
-    pub fn new(points: Vec<TimedPoint<T, Vec<T>>>) -> Self {
+    pub fn new(times: Vec<T>, points: Vec<Vec<T>>) -> Option<Self> {
+        let timed_points = from_times_and_points(times, points)?;
+        Self::from_points(timed_points)
+    }
+
+    pub fn from_points(points: Vec<TimedPoint<T, Vec<T>>>) -> Option<Self> {
+        if !is_points_valid(&points) {
+            return None;
+        }
+        let dim = points[0].point.len();
         let _0: T = T::zero();
         let _1: T = T::one();
         let _2: T = convert(2.0);
@@ -123,51 +172,35 @@ where
         // x_i = points[i].time
         // y_i = points[i].point[j]
         let n = points.len() - 1;
-        let dim = points[0].point.len();
+
         // size of a is n+1
         let a = points.iter().map(|p| p.point.clone()).collect::<Vec<_>>();
         // size of h is n
-        let mut h: Vec<T> = vec![_0; n];
+        let mut h = vec![_0; n];
         for i in 0..n {
             h[i] = points[i + 1].time - points[i].time;
         }
-        let mut alpha = Vec::<Vec<T>>::new();
-        alpha.reserve(n);
-        for i in 0..n {
-            // alpha[0] is never used
-            let mut alpha_j = Vec::<T>::new();
+        let mut alpha = vec![vec![_0; dim]; n];
+        for i in 1..n {
             for j in 0..dim {
-                let second_elm: T = if i == 0 {
-                    _0
-                } else {
-                    _3 / h[i - 1] * (a[i][j] - a[i - 1][j])
-                };
-                alpha_j.push((_3 / h[i] * (a[i + 1][j] - a[i][j])) - second_elm);
+                alpha[i][j] = (_3 / h[i] * (a[i + 1][j] - a[i][j])) -
+                    (_3 / h[i - 1] * (a[i][j] - a[i - 1][j]));
             }
-            alpha.push(alpha_j);
         }
-        let mut c = Vec::<Vec<T>>::new();
-        let mut b = Vec::<Vec<T>>::new();
-        let mut d = Vec::<Vec<T>>::new();
-        b.resize(n, vec![_0; dim]);
-        c.resize(n + 1, vec![_0; dim]);
-        d.resize(n, vec![_0; dim]);
+        let mut b = vec![vec![_0; dim]; n];
+        let mut c = vec![vec![_0; dim]; n + 1];
+        let mut d = vec![vec![_0; dim]; n];
         let mut l = vec![_1; n + 1];
         let mut m = vec![_0; n + 1];
-        let mut z = Vec::<Vec<T>>::new();
-        z.push(vec![_0; dim]);
+        let mut z = vec![vec![_0; dim]; n + 1];
         for i in 1..n {
             l[i] = _2 * (points[i + 1].time - points[i - 1].time) - h[i - 1] * m[i - 1];
             m[i] = h[i] / l[i];
-            let mut z_j = Vec::<T>::new();
-            z_j.reserve(dim);
             for j in 0..dim {
-                z_j.push((alpha[i][j] - h[i - 1] * z[i - 1][j]) / l[i])
+                z[i][j] = (alpha[i][j] - h[i - 1] * z[i - 1][j]) / l[i];
             }
-            z.push(z_j);
         }
         l[n] = _1;
-        z.push(vec![_0; dim]);
         for j_ in 1..n + 1 {
             let j = n - j_;
             for k in 0..dim {
@@ -181,14 +214,14 @@ where
                 d[j][k] = (c[j + 1][k] - c[j][k]) / (_3 * h[j]);
             }
         }
-        Self {
+        Some(Self {
             points,
             dim,
             a,
             b,
             c,
             d,
-        }
+        })
     }
 }
 
@@ -204,8 +237,7 @@ where
         }
         for i in 0..(self.points.len() - 1) {
             if t >= self.points[i].time && t <= self.points[i + 1].time {
-                let mut pt = Vec::<T>::new();
-                pt.resize(self.dim, T::zero());
+                let mut pt = vec![T::zero(); self.dim];
                 let dx = t - self.points[i].time;
                 for (j, point_iter) in pt.iter_mut().enumerate() {
                     *point_iter = self.a[i][j] + self.b[i][j] * dx + self.c[i][j] * dx * dx +
@@ -222,8 +254,7 @@ where
         }
         for i in 0..(self.points.len() - 1) {
             if t >= self.points[i].time && t <= self.points[i + 1].time {
-                let mut pt = Vec::<T>::new();
-                pt.resize(self.dim, T::zero());
+                let mut pt = vec![T::zero(); self.dim];
                 let dx = t - self.points[i].time;
                 for (j, point_iter) in pt.iter_mut().enumerate() {
                     *point_iter = self.b[i][j] + convert::<T>(2.0) * self.c[i][j] * dx +
@@ -240,8 +271,7 @@ where
         }
         for i in 0..(self.points.len() - 1) {
             if t >= self.points[i].time && t <= self.points[i + 1].time {
-                let mut pt = Vec::<T>::new();
-                pt.resize(self.dim, T::zero());
+                let mut pt = vec![T::zero(); self.dim];
                 let dx = t - self.points[i].time;
                 for (j, point_iter) in pt.iter_mut().enumerate() {
                     *point_iter = convert::<T>(2.0) * self.c[i][j] +
@@ -267,7 +297,7 @@ mod tests {
             TimedVec::new(3.0, vec![3.0, 3.0]),
             TimedVec::new(4.0, vec![1.0, 5.0]),
         ];
-        let ip = LinearVectorInterpolator::new(points);
+        let ip = LinearVectorInterpolator::from_points(points).unwrap();
         let p0 = ip.position(-0.5);
         assert!(p0.is_none());
         let p1 = ip.position(0.5).unwrap();
@@ -292,7 +322,7 @@ mod tests {
             TimedVec::new(3.0, vec![3.0, 3.0]),
             TimedVec::new(4.0, vec![1.0, 5.0]),
         ];
-        let ip = CSplineVectorInterpolator::new(points);
+        let ip = CSplineVectorInterpolator::from_points(points).unwrap();
         for i in 0..400 {
             let t = i as f64 * 0.01f64;
             let p = ip.position(t).unwrap();
@@ -308,7 +338,7 @@ mod tests {
             TimedVec::new(3.0, vec![3.0, 3.0]),
             TimedVec::new(4.0, vec![1.0, 5.0]),
         ];
-        let ip = CSplineVectorInterpolator::new(points);
+        let ip = CSplineVectorInterpolator::from_points(points).unwrap();
         for i in 0..400 {
             let t = i as f64 * 0.01f64;
             let p = ip.velocity(t).unwrap();
@@ -318,13 +348,14 @@ mod tests {
 
     #[test]
     fn test_acceleration() {
+        let times = vec![0.0, 1.0, 3.0, 4.0];
         let points = vec![
-            TimedVec::new(0.0, vec![0.0, -1.0]),
-            TimedVec::new(1.0, vec![2.0, -3.0]),
-            TimedVec::new(3.0, vec![3.0, 3.0]),
-            TimedVec::new(4.0, vec![1.0, 5.0]),
+            vec![0.0, -1.0],
+            vec![2.0, -3.0],
+            vec![3.0, 3.0],
+            vec![1.0, 5.0],
         ];
-        let ip = CSplineVectorInterpolator::new(points);
+        let ip = CSplineVectorInterpolator::new(times, points).unwrap();
         for i in 0..400 {
             let t = i as f64 * 0.01f64;
             let p = ip.acceleration(t).unwrap();

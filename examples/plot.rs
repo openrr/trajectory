@@ -13,7 +13,7 @@ fn main() {
         TimedVec::new(3.0, vec![3.0, 3.0]),
         TimedVec::new(4.0, vec![1.0, 5.0]),
     ];
-    let ip = CSplineVectorInterpolator::new(points);
+    let ip = CSplineVectorInterpolator::from_points(points).unwrap();
 
     let mut times = Vec::new();
     let mut positions0 = Vec::new();
