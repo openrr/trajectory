@@ -4,4 +4,3 @@ version = "0.1.0"
 authors = ["Takashi Ogura <t.ogura@gmail.com>"]
 
 [dependencies]
-nalgebra = "0.13.1"
