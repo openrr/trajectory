@@ -1,5 +1,5 @@
 [package]
-name = "cspline"
+name = "trajectory"
 version = "0.1.0"
 authors = ["Takashi Ogura <t.ogura@gmail.com>"]
 
