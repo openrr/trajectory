@@ -1,3 +1,3 @@
-# cpline
+# trajectory
 
-Cubic spline interpolator
+Trajectory interpolator for Rust and Robotics.

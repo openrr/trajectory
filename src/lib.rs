@@ -9,23 +9,12 @@ pub trait Trajectory {
     fn acceleration(&self, t: Self::Time) -> Option<Self::Point>;
 }
 
-pub struct TimedPoint<K, T> {
-    pub time: K,
-    pub point: T,
-}
-
-impl<K, T> TimedPoint<K, T> {
-    pub fn new(time: K, point: T) -> Self {
-        Self { time, point }
-    }
-}
-
 pub struct LinearVectorInterpolator<T>
 where
     T: Float,
 {
-    points: Vec<TimedPoint<T, Vec<T>>>,
-    dim: usize,
+    times: Vec<T>,
+    points: Vec<Vec<T>>,
 }
 
 impl<T> LinearVectorInterpolator<T>
@@ -33,17 +22,10 @@ where
     T: Float,
 {
     pub fn new(times: Vec<T>, points: Vec<Vec<T>>) -> Option<Self> {
-        let timed_points = from_times_and_points(times, points)?;
-        Self::from_points(timed_points)
-    }
-    pub fn from_points(points: Vec<TimedPoint<T, Vec<T>>>) -> Option<Self> {
-        if !is_points_valid(&points) {
+        if !is_inputs_valid(&times, &points) {
             return None;
         }
-        Some(Self {
-            dim: points[0].point.len(),
-            points,
-        })
+        Some(Self { times, points })
     }
 }
 
@@ -54,16 +36,16 @@ where
     type Point = Vec<T>;
     type Time = T;
     fn position(&self, t: T) -> Option<Vec<T>> {
-        if t < self.points[0].time {
+        if t < self.times[0] {
             return None;
         }
         for i in 0..(self.points.len() - 1) {
-            if t >= self.points[i].time && t <= self.points[i + 1].time {
-                let mut pt = self.points[i].point.clone();
-                let p0 = &self.points[i].point;
-                let t0 = self.points[i].time;
-                let p1 = &self.points[i + 1].point;
-                let t1 = self.points[i + 1].time;
+            let t0 = self.times[i];
+            let t1 = self.times[i + 1];
+            if t >= t0 && t <= t1 {
+                let mut pt = self.points[i].clone();
+                let p0 = &self.points[i];
+                let p1 = &self.points[i + 1];
                 for j in 0..p0.len() {
                     pt[j] = pt[j] + (p1[j] - p0[j]) / (t1 - t0) * (t - t0);
                 }
@@ -73,16 +55,18 @@ where
         None
     }
     fn velocity(&self, t: T) -> Option<Vec<T>> {
-        if t < self.points[0].time {
+        if t < self.times[0] {
             return None;
         }
+        let dim = self.points[0].len();
+
         for i in 0..(self.points.len() - 1) {
-            if t >= self.points[i].time && t <= self.points[i + 1].time {
-                let mut pt = vec![T::zero(); self.dim];
-                let p0 = &self.points[i].point;
-                let t0 = self.points[i].time;
-                let p1 = &self.points[i + 1].point;
-                let t1 = self.points[i + 1].time;
+            let t0 = self.times[i];
+            let t1 = self.times[i + 1];
+            if t >= t0 && t <= t1 {
+                let mut pt = vec![T::zero(); dim];
+                let p0 = &self.points[i];
+                let p1 = &self.points[i + 1];
                 for j in 0..p0.len() {
                     pt[j] = (p1[j] - p0[j]) / (t1 - t0);
                 }
@@ -101,8 +85,8 @@ pub struct CSplineVectorInterpolator<T>
 where
     T: Float,
 {
-    points: Vec<TimedPoint<T, Vec<T>>>,
-    dim: usize,
+    times: Vec<T>,
+    points: Vec<Vec<T>>,
     a: Vec<Vec<T>>,
     b: Vec<Vec<T>>,
     c: Vec<Vec<T>>,
@@ -116,37 +100,32 @@ where
     T::from(val).unwrap()
 }
 
-fn is_points_valid<T>(points: &Vec<TimedPoint<T, Vec<T>>>) -> bool {
-    if points.is_empty() {
-        return false;
-    }
-    if points[0].point.is_empty() {
-        return false;
-    }
-    let dim = points[0].point.len();
-    for p in points {
-        if p.point.len() != dim {
-            return false;
-        }
-    }
-    true
-}
-
-fn from_times_and_points<T>(
-    times: Vec<T>,
-    points: Vec<Vec<T>>,
-) -> Option<Vec<TimedPoint<T, Vec<T>>>>
+fn is_inputs_valid<T>(times: &Vec<T>, points: &Vec<Vec<T>>) -> bool
 where
     T: Float,
 {
     if times.len() != points.len() {
-        return None;
+        return false;
     }
-    let mut timed_points: Vec<TimedPoint<T, Vec<T>>> = Vec::new();
-    for (i, point) in points.into_iter().enumerate() {
-        timed_points.push(TimedPoint::new(times[i], point));
+    for i in 0..times.len() - 1 {
+        // not sorted time
+        if times[i] >= times[i + 1] {
+            return false;
+        }
     }
-    Some(timed_points)
+    if points.is_empty() {
+        return false;
+    }
+    if points[0].is_empty() {
+        return false;
+    }
+    let dim = points[0].len();
+    for p in points {
+        if p.len() != dim {
+            return false;
+        }
+    }
+    true
 }
 
 // from https://en.wikipedia.org/wiki/Spline_(mathematics)
@@ -155,30 +134,25 @@ where
     T: Float,
 {
     pub fn new(times: Vec<T>, points: Vec<Vec<T>>) -> Option<Self> {
-        let timed_points = from_times_and_points(times, points)?;
-        Self::from_points(timed_points)
-    }
-
-    pub fn from_points(points: Vec<TimedPoint<T, Vec<T>>>) -> Option<Self> {
-        if !is_points_valid(&points) {
+        if !is_inputs_valid(&times, &points) {
             return None;
         }
-        let dim = points[0].point.len();
+        let dim = points[0].len();
         let _0: T = T::zero();
         let _1: T = T::one();
         let _2: T = convert(2.0);
         let _3: T = convert(3.0);
 
-        // x_i = points[i].time
-        // y_i = points[i].point[j]
+        // x_i = times[i]
+        // y_i = points[i][j]
         let n = points.len() - 1;
 
         // size of a is n+1
-        let a = points.iter().map(|p| p.point.clone()).collect::<Vec<_>>();
+        let a = points.iter().map(|p| p.clone()).collect::<Vec<_>>();
         // size of h is n
         let mut h = vec![_0; n];
         for i in 0..n {
-            h[i] = points[i + 1].time - points[i].time;
+            h[i] = times[i + 1] - times[i];
         }
         let mut alpha = vec![vec![_0; dim]; n];
         for i in 1..n {
@@ -194,7 +168,7 @@ where
         let mut m = vec![_0; n + 1];
         let mut z = vec![vec![_0; dim]; n + 1];
         for i in 1..n {
-            l[i] = _2 * (points[i + 1].time - points[i - 1].time) - h[i - 1] * m[i - 1];
+            l[i] = _2 * (times[i + 1] - times[i - 1]) - h[i - 1] * m[i - 1];
             m[i] = h[i] / l[i];
             for j in 0..dim {
                 z[i][j] = (alpha[i][j] - h[i - 1] * z[i - 1][j]) / l[i];
@@ -215,8 +189,8 @@ where
             }
         }
         Some(Self {
+            times,
             points,
-            dim,
             a,
             b,
             c,
@@ -232,13 +206,14 @@ where
     type Point = Vec<T>;
     type Time = T;
     fn position(&self, t: T) -> Option<Vec<T>> {
-        if t < self.points[0].time {
+        if t < self.times[0] {
             return None;
         }
+        let dim = self.points[0].len();
         for i in 0..(self.points.len() - 1) {
-            if t >= self.points[i].time && t <= self.points[i + 1].time {
-                let mut pt = vec![T::zero(); self.dim];
-                let dx = t - self.points[i].time;
+            if t >= self.times[i] && t <= self.times[i + 1] {
+                let mut pt = vec![T::zero(); dim];
+                let dx = t - self.times[i];
                 for (j, point_iter) in pt.iter_mut().enumerate() {
                     *point_iter = self.a[i][j] + self.b[i][j] * dx + self.c[i][j] * dx * dx +
                         self.d[i][j] * dx * dx * dx;
@@ -249,13 +224,14 @@ where
         None
     }
     fn velocity(&self, t: T) -> Option<Vec<T>> {
-        if t < self.points[0].time {
+        if t < self.times[0] {
             return None;
         }
+        let dim = self.points[0].len();
         for i in 0..(self.points.len() - 1) {
-            if t >= self.points[i].time && t <= self.points[i + 1].time {
-                let mut pt = vec![T::zero(); self.dim];
-                let dx = t - self.points[i].time;
+            if t >= self.times[i] && t <= self.times[i + 1] {
+                let mut pt = vec![T::zero(); dim];
+                let dx = t - self.times[i];
                 for (j, point_iter) in pt.iter_mut().enumerate() {
                     *point_iter = self.b[i][j] + convert::<T>(2.0) * self.c[i][j] * dx +
                         convert::<T>(3.0) * self.d[i][j] * dx * dx;
@@ -266,13 +242,14 @@ where
         None
     }
     fn acceleration(&self, t: T) -> Option<Vec<T>> {
-        if t < self.points[0].time {
+        if t < self.times[0] {
             return None;
         }
+        let dim = self.points[0].len();
         for i in 0..(self.points.len() - 1) {
-            if t >= self.points[i].time && t <= self.points[i + 1].time {
-                let mut pt = vec![T::zero(); self.dim];
-                let dx = t - self.points[i].time;
+            if t >= self.times[i] && t <= self.times[i + 1] {
+                let mut pt = vec![T::zero(); dim];
+                let dx = t - self.times[i];
                 for (j, point_iter) in pt.iter_mut().enumerate() {
                     *point_iter = convert::<T>(2.0) * self.c[i][j] +
                         convert::<T>(6.0) * self.d[i][j] * dx;
@@ -288,16 +265,16 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    type TimedVec = TimedPoint<f64, Vec<f64>>;
     #[test]
     fn test_linear() {
+        let times = vec![0.0, 1.0, 3.0, 4.0];
         let points = vec![
-            TimedVec::new(0.0, vec![0.0, -1.0]),
-            TimedVec::new(1.0, vec![2.0, -3.0]),
-            TimedVec::new(3.0, vec![3.0, 3.0]),
-            TimedVec::new(4.0, vec![1.0, 5.0]),
+            vec![0.0, -1.0],
+            vec![2.0, -3.0],
+            vec![3.0, 3.0],
+            vec![1.0, 5.0],
         ];
-        let ip = LinearVectorInterpolator::from_points(points).unwrap();
+        let ip = LinearVectorInterpolator::new(times, points).unwrap();
         let p0 = ip.position(-0.5);
         assert!(p0.is_none());
         let p1 = ip.position(0.5).unwrap();
@@ -316,13 +293,14 @@ mod tests {
 
     #[test]
     fn test_spline() {
+        let times = vec![0.0, 1.0, 3.0, 4.0];
         let points = vec![
-            TimedVec::new(0.0, vec![0.0, -1.0]),
-            TimedVec::new(1.0, vec![2.0, -3.0]),
-            TimedVec::new(3.0, vec![3.0, 3.0]),
-            TimedVec::new(4.0, vec![1.0, 5.0]),
+            vec![0.0, -1.0],
+            vec![2.0, -3.0],
+            vec![3.0, 3.0],
+            vec![1.0, 5.0],
         ];
-        let ip = CSplineVectorInterpolator::from_points(points).unwrap();
+        let ip = CSplineVectorInterpolator::new(times, points).unwrap();
         for i in 0..400 {
             let t = i as f64 * 0.01f64;
             let p = ip.position(t).unwrap();
@@ -332,13 +310,14 @@ mod tests {
 
     #[test]
     fn test_velocity() {
+        let times = vec![0.0, 1.0, 3.0, 4.0];
         let points = vec![
-            TimedVec::new(0.0, vec![0.0, -1.0]),
-            TimedVec::new(1.0, vec![2.0, -3.0]),
-            TimedVec::new(3.0, vec![3.0, 3.0]),
-            TimedVec::new(4.0, vec![1.0, 5.0]),
+            vec![0.0, -1.0],
+            vec![2.0, -3.0],
+            vec![3.0, 3.0],
+            vec![1.0, 5.0],
         ];
-        let ip = CSplineVectorInterpolator::from_points(points).unwrap();
+        let ip = CSplineVectorInterpolator::new(times, points).unwrap();
         for i in 0..400 {
             let t = i as f64 * 0.01f64;
             let p = ip.velocity(t).unwrap();
@@ -362,5 +341,4 @@ mod tests {
             println!("{} {} {}", t, p[0], p[1]);
         }
     }
-
 }

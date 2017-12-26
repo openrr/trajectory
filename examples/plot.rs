@@ -4,16 +4,17 @@ extern crate trajectory;
 use gnuplot::{Figure, Caption, Color};
 use trajectory::CSplineVectorInterpolator;
 use trajectory::Trajectory;
-type TimedVec = trajectory::TimedPoint<f64, Vec<f64>>;
 
 fn main() {
+
+    let times = vec![0.0, 1.0, 3.0, 4.0];
     let points = vec![
-        TimedVec::new(0.0, vec![0.0, -1.0]),
-        TimedVec::new(1.0, vec![2.0, -3.0]),
-        TimedVec::new(3.0, vec![3.0, 3.0]),
-        TimedVec::new(4.0, vec![1.0, 5.0]),
+        vec![0.0, -1.0],
+        vec![2.0, -3.0],
+        vec![3.0, 3.0],
+        vec![1.0, 5.0],
     ];
-    let ip = CSplineVectorInterpolator::from_points(points).unwrap();
+    let ip = CSplineVectorInterpolator::new(times, points).unwrap();
 
     let mut times = Vec::new();
     let mut positions0 = Vec::new();
@@ -40,5 +41,11 @@ fn main() {
         .lines(&times, &positions0, &[Caption("Position"), Color("red")])
         .lines(&times, &velocities0, &[Caption("Velocity"), Color("green")])
         .lines(&times, &accs0, &[Caption("Acceleration"), Color("blue")]);
+    fg.show();
+    let mut fg = Figure::new();
+    fg.axes2d()
+        .lines(&times, &positions1, &[Caption("Position"), Color("red")])
+        .lines(&times, &velocities1, &[Caption("Velocity"), Color("green")])
+        .lines(&times, &accs1, &[Caption("Acceleration"), Color("blue")]);
     fg.show();
 }
