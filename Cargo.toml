@@ -5,3 +5,6 @@ authors = ["Takashi Ogura <t.ogura@gmail.com>"]
 
 [dependencies]
 num-traits = "0.1"
+
+[dev-dependencies]
+gnuplot = "0.0"
