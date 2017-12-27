@@ -2,7 +2,7 @@ extern crate gnuplot;
 extern crate trajectory;
 
 use gnuplot::{Figure, Caption, Color};
-use trajectory::CSplineVectorInterpolator;
+use trajectory::CubicSpline;
 use trajectory::Trajectory;
 
 fn main() {
@@ -14,7 +14,7 @@ fn main() {
         vec![3.0, 3.0],
         vec![1.0, 5.0],
     ];
-    let ip = CSplineVectorInterpolator::new(times, points).unwrap();
+    let ip = CubicSpline::new(times, points).unwrap();
 
     let mut times = Vec::new();
     let mut positions0 = Vec::new();
