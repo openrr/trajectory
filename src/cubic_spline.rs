@@ -99,6 +99,7 @@ where
 {
     type Point = Vec<T>;
     type Time = T;
+
     fn position(&self, t: T) -> Option<Vec<T>> {
         if t < self.times[0] {
             return None;
@@ -117,6 +118,7 @@ where
         }
         None
     }
+
     fn velocity(&self, t: T) -> Option<Vec<T>> {
         if t < self.times[0] {
             return None;
@@ -135,6 +137,7 @@ where
         }
         None
     }
+
     fn acceleration(&self, t: T) -> Option<Vec<T>> {
         if t < self.times[0] {
             return None;
