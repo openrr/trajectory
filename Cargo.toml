@@ -10,8 +10,9 @@ repository = "https://github.com/openrr/trajectory"
 documentation = "http://docs.rs/trajectory"
 readme = "README.md"
 
+# Note: num-traits is public dependency.
 [dependencies]
-num-traits = "0.1"
+num-traits = "0.2"
 
 [dev-dependencies]
 gnuplot = "0.0"
