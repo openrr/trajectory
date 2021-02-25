@@ -1,12 +1,11 @@
 extern crate gnuplot;
 extern crate trajectory;
 
-use gnuplot::{Figure, Caption, Color};
+use gnuplot::{Caption, Color, Figure};
 use trajectory::CubicSpline;
 use trajectory::Trajectory;
 
 fn main() {
-
     let times = vec![0.0, 1.0, 3.0, 4.0];
     let points = vec![
         vec![0.0, -1.0],
