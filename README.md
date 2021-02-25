@@ -1,5 +1,7 @@
 # trajectory
 
+[![Build Status](https://img.shields.io/github/workflow/status/openrr/trajectory/CI/main)](https://github.com/openrr/trajectory/actions)
+
 Trajectory interpolator for Rust.
 
 ## Code example
