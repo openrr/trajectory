@@ -1,6 +1,6 @@
-use num_traits::Float;
 use super::traits::*;
 use super::utils::*;
+use num_traits::Float;
 
 pub struct Linear<T>
 where
@@ -84,7 +84,6 @@ where
         Some(vec![T::zero(); dim])
     }
 }
-
 
 #[cfg(test)]
 mod tests {

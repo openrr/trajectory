@@ -1,10 +1,10 @@
 extern crate num_traits;
 
+mod cubic_spline;
+mod linear;
 mod traits;
 mod utils;
-mod linear;
-mod cubic_spline;
 
-pub use self::traits::*;
-pub use self::linear::*;
 pub use self::cubic_spline::*;
+pub use self::linear::*;
+pub use self::traits::*;

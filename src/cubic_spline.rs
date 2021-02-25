@@ -1,6 +1,6 @@
-use num_traits::Float;
 use super::traits::*;
 use super::utils::*;
+use num_traits::Float;
 
 fn convert<T>(val: f64) -> T
 where
@@ -20,7 +20,6 @@ where
     c: Vec<Vec<T>>,
     d: Vec<Vec<T>>,
 }
-
 
 // from https://en.wikipedia.org/wiki/Spline_(mathematics)
 impl<T> CubicSpline<T>
@@ -51,8 +50,8 @@ where
         let mut alpha = vec![vec![_0; dim]; n];
         for i in 1..n {
             for j in 0..dim {
-                alpha[i][j] = (_3 / h[i] * (a[i + 1][j] - a[i][j])) -
-                    (_3 / h[i - 1] * (a[i][j] - a[i - 1][j]));
+                alpha[i][j] = (_3 / h[i] * (a[i + 1][j] - a[i][j]))
+                    - (_3 / h[i - 1] * (a[i][j] - a[i - 1][j]));
             }
         }
         let mut b = vec![vec![_0; dim]; n];
@@ -75,8 +74,8 @@ where
                 c[j][k] = z[j][k] - m[j] * c[j + 1][k];
             }
             for k in 0..dim {
-                b[j][k] = (a[j + 1][k] - a[j][k]) / h[j] -
-                    (h[j] * (c[j + 1][k] + _2 * c[j][k]) / _3);
+                b[j][k] =
+                    (a[j + 1][k] - a[j][k]) / h[j] - (h[j] * (c[j + 1][k] + _2 * c[j][k]) / _3);
             }
             for k in 0..dim {
                 d[j][k] = (c[j + 1][k] - c[j][k]) / (_3 * h[j]);
@@ -110,8 +109,10 @@ where
                 let mut pt = vec![T::zero(); dim];
                 let dx = t - self.times[i];
                 for (j, point_iter) in pt.iter_mut().enumerate() {
-                    *point_iter = self.a[i][j] + self.b[i][j] * dx + self.c[i][j] * dx * dx +
-                        self.d[i][j] * dx * dx * dx;
+                    *point_iter = self.a[i][j]
+                        + self.b[i][j] * dx
+                        + self.c[i][j] * dx * dx
+                        + self.d[i][j] * dx * dx * dx;
                 }
                 return Some(pt);
             }
@@ -129,8 +130,9 @@ where
                 let mut pt = vec![T::zero(); dim];
                 let dx = t - self.times[i];
                 for (j, point_iter) in pt.iter_mut().enumerate() {
-                    *point_iter = self.b[i][j] + convert::<T>(2.0) * self.c[i][j] * dx +
-                        convert::<T>(3.0) * self.d[i][j] * dx * dx;
+                    *point_iter = self.b[i][j]
+                        + convert::<T>(2.0) * self.c[i][j] * dx
+                        + convert::<T>(3.0) * self.d[i][j] * dx * dx;
                 }
                 return Some(pt);
             }
@@ -148,8 +150,8 @@ where
                 let mut pt = vec![T::zero(); dim];
                 let dx = t - self.times[i];
                 for (j, point_iter) in pt.iter_mut().enumerate() {
-                    *point_iter = convert::<T>(2.0) * self.c[i][j] +
-                        convert::<T>(6.0) * self.d[i][j] * dx;
+                    *point_iter =
+                        convert::<T>(2.0) * self.c[i][j] + convert::<T>(6.0) * self.d[i][j] * dx;
                 }
                 return Some(pt);
             }
@@ -157,7 +159,6 @@ where
         None
     }
 }
-
 
 #[cfg(test)]
 mod tests {
