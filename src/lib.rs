@@ -1,5 +1,3 @@
-extern crate num_traits;
-
 mod cubic_spline;
 mod linear;
 mod traits;

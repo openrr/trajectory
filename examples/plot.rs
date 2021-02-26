@@ -1,6 +1,3 @@
-extern crate gnuplot;
-extern crate trajectory;
-
 use gnuplot::{Caption, Color, Figure};
 use trajectory::CubicSpline;
 use trajectory::Trajectory;
