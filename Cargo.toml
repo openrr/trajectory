@@ -2,6 +2,7 @@
 name = "trajectory"
 version = "0.0.1"
 authors = ["Takashi Ogura <t.ogura@gmail.com>"]
+edition = "2018"
 description = "Trajectory interpolation"
 license = "Apache-2.0"
 keywords = ["spline", "robotics", "interpolation"]
