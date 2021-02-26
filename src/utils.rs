@@ -1,6 +1,6 @@
 use num_traits::Float;
 
-pub fn is_inputs_valid<T>(times: &Vec<T>, points: &Vec<Vec<T>>) -> bool
+pub fn is_inputs_valid<T>(times: &[T], points: &[Vec<T>]) -> bool
 where
     T: Float,
 {
