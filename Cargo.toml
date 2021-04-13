@@ -9,7 +9,6 @@ keywords = ["spline", "robotics", "interpolation"]
 categories = ["algorithms"]
 repository = "https://github.com/openrr/trajectory"
 documentation = "http://docs.rs/trajectory"
-readme = "README.md"
 
 # Note: num-traits is public dependency.
 [dependencies]
