@@ -37,11 +37,11 @@ fn main() {
         .lines(&times, &positions0, &[Caption("Position"), Color("red")])
         .lines(&times, &velocities0, &[Caption("Velocity"), Color("green")])
         .lines(&times, &accs0, &[Caption("Acceleration"), Color("blue")]);
-    fg.show();
+    let _ = fg.show();
     let mut fg = Figure::new();
     fg.axes2d()
         .lines(&times, &positions1, &[Caption("Position"), Color("red")])
         .lines(&times, &velocities1, &[Caption("Velocity"), Color("green")])
         .lines(&times, &accs1, &[Caption("Acceleration"), Color("blue")]);
-    fg.show();
+    let _ = fg.show();
 }

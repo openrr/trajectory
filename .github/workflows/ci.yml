@@ -2,12 +2,13 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 env:
   CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
   RUST_BACKTRACE: 1
 
 defaults:
@@ -18,8 +19,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - run: cargo fmt -- --check
-      if: matrix.rust == 'stable'
-    - run: cargo build --verbose
-    - run: cargo test --verbose
+      - uses: actions/checkout@v2
+      - name: Install Rust
+        run: rustup update stable
+      - run: cargo fmt -- --check
+      - run: cargo clippy --all-targets
+      - run: cargo build
+      - run: cargo test

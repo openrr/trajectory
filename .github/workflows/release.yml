@@ -2,7 +2,7 @@ name: Release
 
 on:
   push:
-    tags: [ "v[0-9]+.*" ]
+    tags: ['v[0-9]+.*']
 
 env:
   CARGO_TERM_COLOR: always
@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Install Rust
+        run: rustup update stable
       - run: cargo package
       - uses: taiki-e/create-gh-release-action@v1
         env:
