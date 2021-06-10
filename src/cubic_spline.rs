@@ -26,6 +26,7 @@ impl<T> CubicSpline<T>
 where
     T: Float,
 {
+    #[allow(clippy::many_single_char_names, clippy::just_underscores_and_digits)]
     pub fn new(times: Vec<T>, points: Vec<Vec<T>>) -> Option<Self> {
         if !is_inputs_valid(&times, &points) {
             return None;
@@ -41,7 +42,7 @@ where
         let n = points.len() - 1;
 
         // size of a is n+1
-        let a = points.iter().map(|p| p.clone()).collect::<Vec<_>>();
+        let a = points.clone();
         // size of h is n
         let mut h = vec![_0; n];
         for i in 0..n {

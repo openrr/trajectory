@@ -88,6 +88,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use assert_approx_eq::assert_approx_eq;
+
     #[test]
     fn test_linear() {
         let times = vec![0.0, 1.0, 3.0, 4.0];
@@ -101,16 +103,16 @@ mod tests {
         let p0 = ip.position(-0.5);
         assert!(p0.is_none());
         let p1 = ip.position(0.5).unwrap();
-        assert_eq!(p1[0], 1.0);
-        assert_eq!(p1[1], -2.0);
+        assert_approx_eq!(p1[0], 1.0);
+        assert_approx_eq!(p1[1], -2.0);
         let p2 = ip.position(1.0).unwrap();
-        assert_eq!(p2[0], 2.0);
-        assert_eq!(p2[1], -3.0);
+        assert_approx_eq!(p2[0], 2.0);
+        assert_approx_eq!(p2[1], -3.0);
         let p3 = ip.position(3.0).unwrap();
-        assert_eq!(p3[0], 3.0);
-        assert_eq!(p3[1], 3.0);
+        assert_approx_eq!(p3[0], 3.0);
+        assert_approx_eq!(p3[1], 3.0);
         let p4 = ip.position(3.5).unwrap();
-        assert_eq!(p4[0], 2.0);
-        assert_eq!(p4[1], 4.0);
+        assert_approx_eq!(p4[0], 2.0);
+        assert_approx_eq!(p4[1], 4.0);
     }
 }
