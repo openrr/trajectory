@@ -9,6 +9,7 @@ where
     T::from(val).unwrap()
 }
 
+#[derive(Debug)]
 pub struct CubicSpline<T>
 where
     T: Float,

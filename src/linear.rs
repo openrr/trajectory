@@ -2,6 +2,7 @@ use super::traits::*;
 use super::utils::*;
 use num_traits::Float;
 
+#[derive(Debug)]
 pub struct Linear<T>
 where
     T: Float,
