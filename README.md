@@ -7,7 +7,9 @@ Trajectory interpolator for Rust.
 ## Code example
 
 ```rust
-let times = vec![0.0, 1.0, 3.0, 4.0];
+use trajectory::{CubicSpline, Trajectory};
+
+let times = vec![0.0_f64, 1.0, 3.0, 4.0];
 let points = vec![
     vec![0.0, -1.0],
     vec![2.0, -3.0],
@@ -16,7 +18,7 @@ let points = vec![
 ];
 let ip = CubicSpline::new(times, points).unwrap();
 for i in 0..400 {
-    let t = i as f64 * 0.01f64;
+    let t = i as f64 * 0.01_f64;
     let p = ip.position(t).unwrap();
     let v = ip.velocity(t).unwrap();
     let a = ip.acceleration(t).unwrap();
@@ -31,5 +33,5 @@ It requires `gnuplot`.
 cargo run --example plot
 ```
 
-![](img/plot1.png)
-![](img/plot2.png)
+![plot1](https://github.com/openrr/trajectory/raw/main/img/plot1.png)
+![plot2](https://github.com/openrr/trajectory/raw/main/img/plot2.png)
