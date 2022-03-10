@@ -178,7 +178,7 @@ mod tests {
         for i in 0..400 {
             let t = i as f64 * 0.01f64;
             let p = ip.position(t).unwrap();
-            println!("{} {} {}", t, p[0], p[1]);
+            println!("{t} {} {}", p[0], p[1]);
         }
     }
 
@@ -195,7 +195,7 @@ mod tests {
         for i in 0..400 {
             let t = i as f64 * 0.01f64;
             let p = ip.velocity(t).unwrap();
-            println!("{} {} {}", t, p[0], p[1]);
+            println!("{t} {} {}", p[0], p[1]);
         }
     }
 
@@ -212,7 +212,7 @@ mod tests {
         for i in 0..400 {
             let t = i as f64 * 0.01f64;
             let p = ip.acceleration(t).unwrap();
-            println!("{} {} {}", t, p[0], p[1]);
+            println!("{t} {} {}", p[0], p[1]);
         }
     }
 }
