@@ -1,6 +1,6 @@
 [package]
 name = "trajectory"
-version = "0.0.2"
+version = "0.1.0"
 authors = ["Takashi Ogura <t.ogura@gmail.com>"]
 edition = "2021"
 description = "Trajectory interpolation"
