@@ -17,8 +17,8 @@ fn main() {
     let mut positions1 = Vec::new();
     let mut velocities0 = Vec::new();
     let mut velocities1 = Vec::new();
-    let mut accs0 = Vec::new();
-    let mut accs1 = Vec::new();
+    let mut accelerations0 = Vec::new();
+    let mut accelerations1 = Vec::new();
     for i in 0..400 {
         let t = i as f64 * 0.01f64;
         let p = ip.position(t).unwrap();
@@ -29,19 +29,27 @@ fn main() {
         positions1.push(p[1]);
         velocities0.push(v[0]);
         velocities1.push(v[1]);
-        accs0.push(a[0]);
-        accs1.push(a[1]);
+        accelerations0.push(a[0]);
+        accelerations1.push(a[1]);
     }
     let mut fg = Figure::new();
     fg.axes2d()
         .lines(&times, &positions0, &[Caption("Position"), Color("red")])
         .lines(&times, &velocities0, &[Caption("Velocity"), Color("green")])
-        .lines(&times, &accs0, &[Caption("Acceleration"), Color("blue")]);
+        .lines(
+            &times,
+            &accelerations0,
+            &[Caption("Acceleration"), Color("blue")],
+        );
     let _ = fg.show();
     let mut fg = Figure::new();
     fg.axes2d()
         .lines(&times, &positions1, &[Caption("Position"), Color("red")])
         .lines(&times, &velocities1, &[Caption("Velocity"), Color("green")])
-        .lines(&times, &accs1, &[Caption("Acceleration"), Color("blue")]);
+        .lines(
+            &times,
+            &accelerations1,
+            &[Caption("Acceleration"), Color("blue")],
+        );
     let _ = fg.show();
 }
