@@ -1,0 +1,5 @@
+clippy
+rustdocflags
+rustflags
+rustfmt
+rustup
