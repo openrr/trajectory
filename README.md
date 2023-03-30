@@ -1,6 +1,6 @@
 # trajectory
 
-[![Build Status](https://img.shields.io/github/workflow/status/openrr/trajectory/CI/main)](https://github.com/openrr/trajectory/actions) [![crates.io](https://img.shields.io/crates/v/trajectory.svg)](https://crates.io/crates/trajectory) [![docs](https://docs.rs/trajectory/badge.svg)](https://docs.rs/trajectory) [![discord](https://dcbadge.vercel.app/api/server/8DAFFKc88B?style=flat)](https://discord.gg/8DAFFKc88B)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/openrr/trajectory/ci.yml?branch=main&logo=github)](https://github.com/openrr/trajectory/actions) [![crates.io](https://img.shields.io/crates/v/trajectory.svg?logo=rust)](https://crates.io/crates/trajectory) [![docs](https://docs.rs/trajectory/badge.svg)](https://docs.rs/trajectory) [![discord](https://dcbadge.vercel.app/api/server/8DAFFKc88B?style=flat)](https://discord.gg/8DAFFKc88B)
 
 Trajectory interpolator for Rust.
 
