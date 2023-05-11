@@ -1,5 +1,5 @@
-clippy
 rustdocflags
 rustflags
 rustfmt
 rustup
+SIGINT
