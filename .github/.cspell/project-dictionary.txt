@@ -2,4 +2,3 @@ rustdocflags
 rustflags
 rustfmt
 rustup
-SIGINT
