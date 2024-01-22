@@ -1,4 +1,3 @@
 rustdocflags
 rustflags
-rustfmt
 rustup
