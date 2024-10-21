@@ -16,6 +16,7 @@ num-traits = "0.2"
 [dev-dependencies]
 assert_approx_eq = "1"
 gnuplot = "0.0"
+rerun = "0.19"
 
 [lints]
 workspace = true
