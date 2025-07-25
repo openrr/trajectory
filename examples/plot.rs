@@ -34,22 +34,38 @@ fn main() {
     }
     let mut fg = Figure::new();
     fg.axes2d()
-        .lines(&times, &positions0, &[Caption("Position"), Color("red")])
-        .lines(&times, &velocities0, &[Caption("Velocity"), Color("green")])
+        .lines(
+            &times,
+            &positions0,
+            &[Caption("Position"), Color("red".into())],
+        )
+        .lines(
+            &times,
+            &velocities0,
+            &[Caption("Velocity"), Color("green".into())],
+        )
         .lines(
             &times,
             &accelerations0,
-            &[Caption("Acceleration"), Color("blue")],
+            &[Caption("Acceleration"), Color("blue".into())],
         );
     let _ = fg.show();
     let mut fg = Figure::new();
     fg.axes2d()
-        .lines(&times, &positions1, &[Caption("Position"), Color("red")])
-        .lines(&times, &velocities1, &[Caption("Velocity"), Color("green")])
+        .lines(
+            &times,
+            &positions1,
+            &[Caption("Position"), Color("red".into())],
+        )
+        .lines(
+            &times,
+            &velocities1,
+            &[Caption("Velocity"), Color("green".into())],
+        )
         .lines(
             &times,
             &accelerations1,
-            &[Caption("Acceleration"), Color("blue")],
+            &[Caption("Acceleration"), Color("blue".into())],
         );
     let _ = fg.show();
 }
